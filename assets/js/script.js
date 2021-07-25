@@ -112,12 +112,31 @@ var taskSaveHandler = function(event) {
 
     // replace textarea with new description box
     textareaEl.replaceWith(descriptionBoxEl);
-    
+
+    // save item to localStorage
+    userTasks.push([timeBoxEl.text(), descriptionBoxEl.text()]);
+    localStorage.setItem("userTasks", JSON.stringify(userTasks));
+
     // run time refresh and reinitialize event listener upon saving
     timeRefresh();
     initializeListener();
   }
+};
+
+// retrieve tasks from localStorage
+var userTasks = JSON.parse(localStorage.getItem("userTasks"));
+
+if (userTasks) {
+  for (i = 0; i < userTasks.length; i++) {
+    var timeBoxEl = $(".hour:contains(" + userTasks[i][0] + ")");
+    timeBoxEl.siblings(".description").text(userTasks[i][1]);
+  }
 }
+
+if (!userTasks) {
+  userTasks = [];
+}
+
 
 // check time every 10 minutes
 setInterval(timeRefresh(), 1000 * 600);
