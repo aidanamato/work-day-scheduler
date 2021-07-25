@@ -81,7 +81,12 @@ var taskEditHandler = function(event) {
 
     // replace description box with textarea
     $(event.target).replaceWith(textareaEl);
+
+    // keep textarea in focus
     textareaEl.focus();
+    textareaEl.blur(function() {
+      textareaEl.focus();
+    });
 
     // initialize save button event listener
     $(".container").click(taskSaveHandler);
@@ -90,22 +95,27 @@ var taskEditHandler = function(event) {
 
 var taskSaveHandler = function(event) {
   if ($(event.target).is(".saveBtn") || $(event.target).is(".fa-save")) {
+    // if user clicks save button
     if ($(event.target).siblings().is("textarea")) {
-      var timeBoxEl = $(event.target).siblings(".hour");
-      var textareaEl = $(event.target).siblings("textarea");
-      
-      // recreate description box element with updated text
-      var descriptionBoxEl = $("<div class='col-10 pt-1 border-top border-white description'>");
-      descriptionBoxEl.attr("id", timeBoxEl.text());
-      descriptionBoxEl.text(textareaEl.val());
-
-      // replace textarea with new description box
-      textareaEl.replaceWith(descriptionBoxEl);
-      
-      // run time refresh and reinitialize event listener upon saving
-      timeRefresh();
-      initializeListener();
+      var saveBtn = $(event.target);
+    } else {
+      var saveBtn = $(event.target).parent("button");
     }
+
+    var timeBoxEl = saveBtn.siblings(".hour");
+    var textareaEl = saveBtn.siblings("textarea");
+    
+    // recreate description box element with updated text
+    var descriptionBoxEl = $("<div class='col-10 pt-1 border-top border-white description'>");
+    descriptionBoxEl.attr("id", timeBoxEl.text());
+    descriptionBoxEl.text(textareaEl.val());
+
+    // replace textarea with new description box
+    textareaEl.replaceWith(descriptionBoxEl);
+    
+    // run time refresh and reinitialize event listener upon saving
+    timeRefresh();
+    initializeListener();
   }
 }
 
