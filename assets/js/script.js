@@ -29,10 +29,13 @@ var timeRefresh = function() {
   // display current day on page
   $("#currentDay").text(currentDay + daySuffix);
 
-  // color code tasks
-  var currentHour = currentTimeObj.toFormat("ha")
+  // find all description boxes
   var taskNameQry = $(".description");
+
+  // remove current color-code classes
+  taskNameQry.removeClass("past present future");
   
+  // color code boxes according to urgency
   taskNameQry.each(function() {
     var currentId = $(this).attr("id")
     var timeSlotObj = luxon.DateTime.fromFormat(currentId, "ha");
@@ -51,5 +54,63 @@ var timeRefresh = function() {
   });
 };
 
+var initializeListener = function() {
+  $(".container").on("click", taskEditHandler);
+}
+
+var taskEditHandler = function(event) {
+  // create textarea if target is description box
+  if ($(event.target).is(".description")) {
+    // disable current event listener
+    $(".container").off();
+
+    // create textareaEl
+    var textareaEl = $("<textarea class='col-10 pt-1 border-top border-white textarea'>");
+    textareaEl.val($(event.target).text());
+    
+    // assign color-code class
+    if ($(event.target).is(".past")) {
+      textareaEl.addClass("past");
+    }
+    if ($(event.target).is(".present")) {
+      textareaEl.addClass("present");
+    }
+    if ($(event.target).is(".future")) {
+      textareaEl.addClass("future");
+    }
+
+    // replace description box with textarea
+    $(event.target).replaceWith(textareaEl);
+    textareaEl.focus();
+
+    // initialize save button event listener
+    $(".container").click(taskSaveHandler);
+  }
+};
+
+var taskSaveHandler = function(event) {
+  if ($(event.target).is(".saveBtn") || $(event.target).is(".fa-save")) {
+    if ($(event.target).siblings().is("textarea")) {
+      var timeBoxEl = $(event.target).siblings(".hour");
+      var textareaEl = $(event.target).siblings("textarea");
+      
+      // recreate description box element with updated text
+      var descriptionBoxEl = $("<div class='col-10 pt-1 border-top border-white description'>");
+      descriptionBoxEl.attr("id", timeBoxEl.text());
+      descriptionBoxEl.text(textareaEl.val());
+
+      // replace textarea with new description box
+      textareaEl.replaceWith(descriptionBoxEl);
+      
+      // run time refresh and reinitialize event listener upon saving
+      timeRefresh();
+      initializeListener();
+    }
+  }
+}
+
 // check time every 10 minutes
 setInterval(timeRefresh(), 1000 * 600);
+
+// initialize event listener to allow editing tasks
+initializeListener();
